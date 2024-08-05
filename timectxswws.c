@@ -115,5 +115,6 @@ int main(int argc, char **argv) {
   printf("%i process context switches (wss:%4liK) in %12lluns (%.1fns/ctxsw)\n",
          nswitches, ws_pages * 4, delta, (delta / (float)nswitches));
   wait(futex);
+  shmctl(shm_id, IPC_RMID, 0);
   return 0;
 }

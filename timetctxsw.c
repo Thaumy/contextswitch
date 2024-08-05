@@ -82,5 +82,6 @@ int main(void) {
   printf("%i  thread context switches in %lluns (%.1fns/ctxsw)\n", nswitches,
          delta, (delta / (float)nswitches));
   wait(futex);
+  shmctl(shm_id, IPC_RMID, 0);
   return 0;
 }
