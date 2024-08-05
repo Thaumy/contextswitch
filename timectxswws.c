@@ -25,23 +25,23 @@
 
 #include <linux/futex.h>
 
-static inline long long unsigned time_ns(struct timespec* const ts) {
+static inline long long unsigned time_ns(struct timespec *const ts) {
   if (clock_gettime(CLOCK_REALTIME, ts)) {
     exit(1);
   }
-  return ((long long unsigned) ts->tv_sec) * 1000000000LLU
-    + (long long unsigned) ts->tv_nsec;
+  return ((long long unsigned)ts->tv_sec) * 1000000000LLU +
+         (long long unsigned)ts->tv_nsec;
 }
 
 static inline int get_iterations(int ws_pages) {
   int iterations = 1000;
-  while (iterations * ws_pages * 4096L < 4294967296L) {  // 4GB
+  while (iterations * ws_pages * 4096L < 4294967296L) { // 4GB
     iterations += 1000;
   }
   return iterations;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "usage: %s <size of working set in 4K pages>\n", *argv);
     return 1;
@@ -56,23 +56,23 @@ int main(int argc, char** argv) {
 
   long long unsigned memset_time = 0;
   if (ws_pages) {
-    void* buf = malloc(ws_pages * 4096);
+    void *buf = malloc(ws_pages * 4096);
     memset_time = time_ns(&ts);
     for (int i = 0; i < iterations; i++) {
       memset(buf, i, ws_pages * 4096);
     }
     memset_time = time_ns(&ts) - memset_time;
-    printf("%i memset on %4liK in %10lluns (%.1fns/page)\n",
-           iterations, ws_pages * 4, memset_time,
-           (memset_time / ((float) ws_pages * iterations)));
+    printf("%i memset on %4liK in %10lluns (%.1fns/page)\n", iterations,
+           ws_pages * 4, memset_time,
+           (memset_time / ((float)ws_pages * iterations)));
     free(buf);
   }
 
-  const int shm_id = shmget(IPC_PRIVATE, (ws_pages + 1) * 4096,
-                            IPC_CREAT | 0666);
+  const int shm_id =
+      shmget(IPC_PRIVATE, (ws_pages + 1) * 4096, IPC_CREAT | 0666);
   const pid_t other = fork();
-  int* futex = shmat(shm_id, NULL, 0);
-  void* ws = ((char *) futex) + 4096;
+  int *futex = shmat(shm_id, NULL, 0);
+  void *ws = ((char *)futex) + 4096;
   *futex = 0xA;
   if (other == 0) {
     for (int i = 0; i < iterations; i++) {
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 
   const int nswitches = iterations * 4;
   printf("%i process context switches (wss:%4liK) in %12lluns (%.1fns/ctxsw)\n",
-         nswitches, ws_pages * 4, delta, (delta / (float) nswitches));
+         nswitches, ws_pages * 4, delta, (delta / (float)nswitches));
   wait(futex);
   return 0;
 }
